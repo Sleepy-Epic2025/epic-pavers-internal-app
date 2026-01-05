@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Epic Pavers – Projects</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: #ffffff;
+      color: #0b1f3a;
+    }
+    h1 {
+      color: #0b1f3a;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    input, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+    }
+    .project {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .status {
+      font-weight: bold;
+      color: #1e4fd8;
+    }
+  </style>
+</head>
+<body>
+  <h1>Epic Pavers Projects</h1>
+
+  <form id="projectForm">
+    <input placeholder="PO Number" id="poNumber" required />
+    <input placeholder="Customer Name" id="customerName" required />
+    <input placeholder="Address" id="address" required />
+    <input placeholder="Assigned Crew" id="assignedCrew" />
+    <button type="submit">Create Project</button>
+  </form>
+
+  <div id="projects">Loading...</div>
+
+  <script>
+    async function loadProjects() {
+      const res = await fetch("/api/projects");
+      const projects = await res.json();
+      const container = document.getElementById("projects");
+      container.innerHTML = "";
+
+      projects.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "project";
+        div.innerHTML = `
+          <div><strong>PO:</strong> ${p.poNumber}</div>
+          <div><strong>Customer:</strong> ${p.customerName}</div>
+          <div><strong>Address:</strong> ${p.address}</div>
+          <div class="status">Status: ${p.status || "Not Started"}</div>
+          <div><strong>Crew:</strong> ${p.assignedCrew || "-"}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    document.getElementById("projectForm").onsubmit = async e => {
+      e.preventDefault();
+      await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          poNumber: poNumber.value,
+          customerName: customerName.value,
+          address: address.value,
+          assignedCrew: assignedCrew.value,
+          status: "Not Started"
+        })
+      });
+      e.target.reset();
+      loadProjects();
+    };
+
+    loadProjects();
+  </script>
+</body>
+</html>
